@@ -1,0 +1,75 @@
+{
+  "name": "Automated Price Monitor",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 60
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [-64, 0],
+      "id": "bafc3f86-59d3-4a7f-913e-e42bfc17d8da",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "url": "https://www.scrapethissite.com/pages/simple/",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [208, 0],
+      "id": "bac2c9ad-c4dd-404b-b18f-421a8f9ee436",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "operation": "extractHtmlContent",
+        "extractionValues": {
+          "values": [
+            {
+              "key": "price",
+              "cssSelector": ".country-population"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.html",
+      "typeVersion": 1.2,
+      "position": [416, 0],
+      "id": "8621c288-4ba6-4d3b-ba23-a3d23dfe20d8",
+      "name": "HTML Extract"
+    },
+    {
+      "parameters": {
+        "chatId": "YOUR_CHAT_ID_HERE",
+        "text": "=Price Alert! The current price is: {{ $json.price }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [624, 0],
+      "id": "e044cd71-a072-4376-8a6e-b0ce41125a47",
+      "name": "Telegram Alert",
+      "credentials": {
+        "telegramApi": {
+          "id": "YOUR_CREDENTIAL_ID_HERE",
+          "name": "Telegram account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": { "main": [[{ "node": "HTTP Request", "type": "main", "index": 0 }]] },
+    "HTTP Request": { "main": [[{ "node": "HTML Extract", "type": "main", "index": 0 }]] },
+    "HTML Extract": { "main": [[{ "node": "Telegram Alert", "type": "main", "index": 0 }]] }
+  }
+}
